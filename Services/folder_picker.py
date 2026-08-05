@@ -1,4 +1,4 @@
-# Copyright NGGT.LightKeeper. All Rights Reserved.
+# Copyright NEXTGGTECH. Elastic License 2.0.
 
 """Native folder picker invoked from the Django backend."""
 

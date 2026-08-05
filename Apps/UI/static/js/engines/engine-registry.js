@@ -1,4 +1,4 @@
-// Copyright NGGT.LightKeeper. All Rights Reserved.
+// Copyright NEXTGGTECH. Elastic License 2.0.
 
 import { aslmChatAdapter } from './aslm-chat.js';
 import { googleGenAiAdapter } from './google-genai.js';
