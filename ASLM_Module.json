@@ -2,9 +2,9 @@
     "fileVersion": 1,
     "id": "aslm-code",
     "name": "ASLM Code",
-    "description": "ASLM Code Module - coding assistant UI with LLM inference delegated to ASLM-Chat",
+    "description": "ASLM Code Module",
     "version": "0.1.2.2",
-    "author": "NGGT-ASLM",
+    "author": "NEXTGGTECH",
     "type": "ui",
     "category": [
         "code"
@@ -14,7 +14,7 @@
     "sidebarIcon": "sidebar_icon.png",
     "source": {
         "type": "github",
-        "repo": "NGGTLightKeeper/ASLM-Code"
+        "repo": "NEXTGGTECH/ASLM-Code"
     },
     "update": {
         "mode": "release",
