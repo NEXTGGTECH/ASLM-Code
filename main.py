@@ -8,7 +8,6 @@ import json
 import os
 import subprocess
 import sys
-import threading
 from pathlib import Path
 
 
@@ -88,65 +87,6 @@ def run_django_command(*args: str, log: bool = False) -> None:
     execute_from_command_line(argv)
 
 
-class LazyDjangoApplication:
-    """Bind the UI port first, then hand requests to Django once it is ready."""
-
-    def __init__(self) -> None:
-        self._application = None
-        self._error: BaseException | None = None
-        self._ready = threading.Event()
-        self._lock = threading.Lock()
-
-    def load_in_background(self) -> None:
-        """Start loading Django without blocking the listening socket."""
-
-        thread = threading.Thread(target=self._load, name="aslm-code-django-loader", daemon=True)
-        thread.start()
-
-    def _load(self) -> None:
-        with self._lock:
-            if self._application is not None or self._error is not None:
-                return
-            try:
-                from ASLM.wsgi import application
-
-                self._application = application
-            except BaseException as exc:
-                self._error = exc
-            finally:
-                self._ready.set()
-
-    def __call__(self, environ, start_response):
-        if self._application is not None:
-            return self._application(environ, start_response)
-
-        if self._error is not None:
-            body = f"ASLM-Code failed to start: {self._error}".encode("utf-8", errors="replace")
-            start_response(
-                "500 Internal Server Error",
-                [("Content-Type", "text/plain; charset=utf-8"), ("Content-Length", str(len(body)))],
-            )
-            return [body]
-
-        body = (
-            "<!doctype html><html><head><meta charset=\"utf-8\">"
-            "<meta http-equiv=\"refresh\" content=\"1\">"
-            "<title>ASLM-Code starting</title></head>"
-            "<body style=\"font-family:Segoe UI,sans-serif;background:#111;color:#eee;\">"
-            "ASLM-Code is starting..."
-            "</body></html>"
-        ).encode("utf-8")
-        start_response(
-            "503 Service Unavailable",
-            [
-                ("Content-Type", "text/html; charset=utf-8"),
-                ("Content-Length", str(len(body))),
-                ("Retry-After", "1"),
-            ],
-        )
-        return [body]
-
-
 # Start Django development server
 def cmd_runserver(port: int, log: bool) -> None:
     """Start the Django development server on the requested port."""
@@ -184,7 +124,10 @@ def cmd_runserver(port: int, log: bool) -> None:
         def log_message(self, format: str, *args) -> None:
             return
 
-    app = LazyDjangoApplication()
+    # Import Django before opening its listening socket.
+    from ASLM.wsgi import application
+
+    app = application
     with make_server(
         "127.0.0.1",
         port,
@@ -192,7 +135,6 @@ def cmd_runserver(port: int, log: bool) -> None:
         server_class=ThreadedWSGIServer,
         handler_class=QuietWSGIRequestHandler,
     ) as httpd:
-        app.load_in_background()
         if log:
             print(f"[ASLM-Code] UI server listening at http://127.0.0.1:{port}/", flush=True)
         httpd.serve_forever()
