@@ -31,9 +31,6 @@ _ASLM_COLOR_KEY_TO_CSS_VAR: Final[dict[str, str]] = {
     "BackgroundTertiary": "--c-bg-elevated",
     "LabelPrimary": "--c-text",
     "LabelSecondary": "--c-text-muted",
-    "LabelTertiary": "--c-text-dim",
-    "LabelQuaternary": "--c-text-quaternary",
-    "PlaceholderText": "--c-text-placeholder",
     "Separator": "--c-border",
     "LinkColor": "--c-link",
     "SystemBlueOverlay": "--c-overlay-blue",
@@ -43,7 +40,6 @@ _ASLM_COLOR_KEY_TO_CSS_VAR: Final[dict[str, str]] = {
     "ActionBlue": "--c-primary",
     "ActionGreen": "--c-success",
     "OverlayBackground": "--c-overlay-scrim",
-    "BackgroundErrorOverlay": "--c-bg-error-overlay",
 }
 
 _HEX_RE = re.compile(r"^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$")
