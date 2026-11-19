@@ -114,15 +114,15 @@ def cmd_runserver(port: int, log: bool) -> None:
             conn.settimeout(_UPLOAD_SOCKET_TIMEOUT_SECONDS)
             return conn, addr
 
-    class QuietWSGIRequestHandler(WSGIRequestHandler):
-        """Keep routine HTTP access logs out of the ASLM console."""
-
-        # Mirror the server-level timeout so BaseHTTPRequestHandler doesn't
-        # override it with a shorter value on its own.
+    # WSGI handler with request logging for the local server.
+    class RequestHandler(WSGIRequestHandler):
+        # Match the server timeout so request handling also allows large uploads.
         timeout = _UPLOAD_SOCKET_TIMEOUT_SECONDS
 
-        def log_message(self, format: str, *args) -> None:
-            return
+        # Log completed requests without including query parameters.
+        def log_request(self, code: int | str = "-", size: int | str = "-") -> None:
+            path = getattr(self, "path", "").partition("?")[0]
+            self.log_message('"%s %s %s" %s %s', self.command or "-", path or "-", self.request_version, code, size)
 
     # Import Django before opening its listening socket.
     from ASLM.wsgi import application
@@ -133,10 +133,9 @@ def cmd_runserver(port: int, log: bool) -> None:
         port,
         app,
         server_class=ThreadedWSGIServer,
-        handler_class=QuietWSGIRequestHandler,
+        handler_class=RequestHandler,
     ) as httpd:
-        if log:
-            print(f"[ASLM-Code] UI server listening at http://127.0.0.1:{port}/", flush=True)
+        print(f"[ASLM-Code] UI server listening at http://127.0.0.1:{httpd.server_port}/", flush=True)
         httpd.serve_forever()
 
 # Apply database migrations

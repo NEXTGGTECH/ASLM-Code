@@ -833,7 +833,7 @@ def _list_tool_servers_cached(engine: str, model_name: str | None = None) -> lis
 
 # Emit one concise runtime event for the ASLM console.
 def _print_runtime_event(message: str) -> None:
-    print(f"[ASLM-Chat] {message}", flush=True)
+    print(f"[ASLM-Code] {message}", flush=True)
 
 
 # Return whether the exception is an expected runtime/connectivity failure.
